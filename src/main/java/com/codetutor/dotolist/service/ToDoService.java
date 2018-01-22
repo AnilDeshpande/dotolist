@@ -100,23 +100,25 @@ public class ToDoService {
 		return todoList;
 	}
 	
-	public List<ToDoItem> addToDoItem(ToDoItem doItem){
+	public ToDoItem addToDoItem(ToDoItem toDoItem){
 		List<ToDoItem> todoList = null;
-		if(isRegisteredAuthor(doItem.getAuthorEmailId())){
-			if(doesToDoListExists(doItem.getAuthorEmailId())) {
-				todoList = toDoListOfAuthors.get(doItem.getAuthorEmailId()).getDoItems();
+		ToDoItem newluCreatedToDItem = null;
+		if(isRegisteredAuthor(toDoItem.getAuthorEmailId())){
+			if(doesToDoListExists(toDoItem.getAuthorEmailId())) {
+				todoList = toDoListOfAuthors.get(toDoItem.getAuthorEmailId()).getDoItems();
+				newluCreatedToDItem=new ToDoItem(toDoItem);
+				todoList.add(new ToDoItem(newluCreatedToDItem));
 			}else {
-				Author author = registeredAuthors.get(doItem.getAuthorEmailId());
+				Author author = registeredAuthors.get(toDoItem.getAuthorEmailId());
 				List<ToDoItem> doItems = new ArrayList<ToDoItem>();
-				ToDoItem newToDoItem = new ToDoItem(doItem.getTodoString(), doItem.getAuthorEmailId());
-				doItems.add(newToDoItem);
+				newluCreatedToDItem = new ToDoItem(toDoItem.getTodoString(), toDoItem.getAuthorEmailId());
+				doItems.add(newluCreatedToDItem);
 				ToDoList doList = new ToDoList(author,doItems);
-				toDoListOfAuthors.put(doItem.getAuthorEmailId(), doList);
-				
-				todoList = toDoListOfAuthors.get(doItem.getAuthorEmailId()).getDoItems();
+				toDoListOfAuthors.put(toDoItem.getAuthorEmailId(), doList);
+		
 			}
 		}
-		return todoList;
+		return newluCreatedToDItem;
 	}
 	
 
