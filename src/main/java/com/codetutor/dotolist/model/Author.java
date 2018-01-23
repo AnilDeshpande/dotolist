@@ -18,7 +18,7 @@ public class Author {
 	}
 	
 	public Author(Author author) {
-		this(author.authorName, author.authorEmailId, author.authorEmailId);
+		this(author.authorName, author.authorEmailId, author.authorPassword);
 	}
 	
 	public Author(String authorName, String authorEmailId, String authorPassword) {
@@ -31,6 +31,10 @@ public class Author {
 	
 	public long getAuthorId() {
 		return authorId;
+	}
+	
+	public void setAuthorId(long authorId) {
+		this.authorId = authorId;
 	}
 	
 	public String getAuthorName() {
@@ -50,6 +54,28 @@ public class Author {
 		this.authorPassword = authorPassword;
 	}
 	
+	public String getAuthorPassword() {
+		return authorPassword;
+	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		// TODO Auto-generated method stub
+		if(obj instanceof Author) {
+			Author author=(Author) obj;
+			if(this.authorEmailId.equals(author.authorEmailId) && this.authorPassword.equals(author.authorPassword) && this.authorId==author.authorId && this.authorName.equals(author.authorName)) {
+				return true;
+			}else {
+				return false;
+			}
+		}else {
+			return false;
+		}
+	}
 
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return "("+this.authorEmailId+", "+this.authorPassword+", "+this.authorId+", "+this.authorName+")";
+	}
 }

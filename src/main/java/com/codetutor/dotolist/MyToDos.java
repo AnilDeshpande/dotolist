@@ -1,11 +1,19 @@
 package com.codetutor.dotolist;
 
+import java.util.List;
+
+import javax.print.attribute.standard.Media;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.codetutor.dotolist.model.Status;
 import com.codetutor.dotolist.model.ToDoItem;
 import com.codetutor.dotolist.service.ToDoService;
 
@@ -20,16 +28,25 @@ public class MyToDos {
 		toDoService = ToDoService.getInstance();
 	}
 	
-	/*@GET
+	@GET
+	@Path("/{authorEmailId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<ToDoItem> getAllToDos(@FormParam("authorEmailId") String authorEmailId){
+	public List<ToDoItem> getAllToDosFromAnAuthor(@PathParam("authorEmailId") String authorEmailId){
 		return toDoService.getMessages(authorEmailId);
-	}*/
+	}
 	
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public ToDoItem getToDoItems(ToDoItem toDoItem){
+	public ToDoItem addToDoByAuthor(ToDoItem toDoItem){
 		return toDoService.addToDoItem(toDoItem);
+	}
+	
+	@DELETE
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Status deleteMessageByAuthor(ToDoItem doItem){
+		return toDoService.deleteToDoItem(doItem);
+		
 	}
 }

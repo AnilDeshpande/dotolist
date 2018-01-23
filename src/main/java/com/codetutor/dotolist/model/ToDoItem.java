@@ -5,7 +5,7 @@ import java.util.Date;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class ToDoItem {
+public class ToDoItem{
 	
 	private static int ID_COUNT = 0;
 
@@ -56,5 +56,21 @@ public class ToDoItem {
 	
 	public void setAuthorEmailId(String authorEmailId) {
 		this.authorEmailId = authorEmailId;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		// TODO Auto-generated method stub
+		if(obj instanceof ToDoItem) {
+			ToDoItem doItem = (ToDoItem) obj;
+			if(this.authorEmailId.equals(doItem.authorEmailId) && this.id==doItem.id) {
+				return true;
+			}else {
+				return false;
+			}
+		}else {
+			return false;
+		}
+		
 	}
 }

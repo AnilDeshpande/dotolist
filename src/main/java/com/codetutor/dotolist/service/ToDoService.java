@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.codetutor.dotolist.model.Author;
+import com.codetutor.dotolist.model.Status;
 import com.codetutor.dotolist.model.ToDoItem;
 import com.codetutor.dotolist.model.ToDoList;
 
@@ -62,13 +64,12 @@ public class ToDoService {
 	public Author registerAuthor(Author author) {
 		Author createdAuthor=null;
 		if(registeredAuthors.containsKey(author.getAuthorEmailId())) {
-			createdAuthor=author;
+			createdAuthor=registeredAuthors.get(author.getAuthorEmailId());
 		}else {
 			createdAuthor=new Author(author);
-			registeredAuthors.put(author.getAuthorEmailId(), author);
+			registeredAuthors.put(author.getAuthorEmailId(), createdAuthor);
 		}
 		return createdAuthor;
-		
 	}
 	
 	public List<ToDoItem> getMessages(String authorEmailId){
@@ -119,6 +120,49 @@ public class ToDoService {
 			}
 		}
 		return newluCreatedToDItem;
+	}
+
+	public ToDoItem getToDo(String authorEmailId, long toDoId) {
+		List<ToDoItem> toDoList= toDoListOfAuthors.get(authorEmailId).getDoItems();
+		ToDoItem doItem = null;
+		if(toDoList!=null) {
+			for(ToDoItem item: toDoList) {
+				if(item.getId() == toDoId) {
+					doItem = item;
+				}
+			}
+		}
+		return doItem;
+	}
+	
+	public Status deleteToDoItem(ToDoItem doItem) {
+		Status status = new Status();
+		List<ToDoItem> toDoList = toDoListOfAuthors.get(doItem.getAuthorEmailId()).getDoItems();
+		if(!toDoList.contains(doItem)) {
+			status = new Status(204, "Could not find entry to delete");
+		}else {
+			toDoList.remove(doItem);
+			toDoListOfAuthors.get(doItem.getAuthorEmailId()).setDoItems(toDoList);
+			status = new Status(200,"Successfully deleted");
+		}
+		return status;
+	}
+	
+	public Status isAuthorAutheticated(Author author) {
+		Status status=null;
+		Author author2 = registeredAuthors.get(author.getAuthorEmailId());
+		System.out.println();
+		if(author2!=null) {
+			if(author.equals(author2)) {
+				status = new Status(200,"Authentication Succeded");
+			}else {
+				status = new Status(204,"Authentication failed");
+			}
+		}else {
+			status=new Status(204, "Authentication Filed");
+		}
+		
+		return status;
 	}
 	
 
