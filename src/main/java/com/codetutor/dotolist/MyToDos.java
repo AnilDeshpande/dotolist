@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.codetutor.dotolist.model.Status;
 import com.codetutor.dotolist.model.ToDoItem;
+import com.codetutor.dotolist.model.UpdateToDoItem;
 import com.codetutor.dotolist.service.ToDoService;
 
 @Path("todolists")
@@ -48,10 +49,14 @@ public class MyToDos {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public ToDoItem updateToDoItem(ToDoItem currentToDoItem ,@PathParam("toDoString") String toDoString) {
-		System.out.println("Before: "+currentToDoItem +" & String: "+toDoString);
-		ToDoItem doItem = toDoService.updateToDoItem(currentToDoItem, toDoString);
-		System.out.println("Before: "+doItem);
-		return doItem;
+		return toDoService.updateToDoItem(currentToDoItem, toDoString);
+	}
+	
+	@PUT
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public ToDoItem updateToDoItem(UpdateToDoItem updateToDoItem) {
+		return toDoService.updateToDoItem(updateToDoItem.getCurrentToDoItem(), updateToDoItem.getProposedToDoItem());
 	}
 	
 	@DELETE

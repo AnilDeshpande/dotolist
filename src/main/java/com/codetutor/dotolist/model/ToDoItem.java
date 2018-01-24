@@ -12,6 +12,7 @@ public class ToDoItem{
 	private long id;
 	private String todoString;
 	private long date;
+	private String place;
 	
 	private String authorEmailId;
 	
@@ -20,15 +21,16 @@ public class ToDoItem{
 	}
 	
 	public ToDoItem(ToDoItem doItem) {
-		this(doItem.todoString, doItem.authorEmailId);
+		this(doItem.todoString, doItem.authorEmailId, doItem.place);
 	}
 	
-	public ToDoItem(String todoString, String authorEmailId) {
+	public ToDoItem(String todoString, String authorEmailId,String place) {
 		super();
 		this.id = ++ID_COUNT;
 		this.todoString = todoString;
 		this.date = new Date().getTime();
 		this.authorEmailId = authorEmailId;
+		this.place = place;
 	}
 	
 	public long getId() {
@@ -58,12 +60,20 @@ public class ToDoItem{
 		this.authorEmailId = authorEmailId;
 	}
 	
+	public String getPlace() {
+		return place;
+	}
+	
+	public void setPlace(String place) {
+		this.place = place;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		// TODO Auto-generated method stub
 		if(obj instanceof ToDoItem) {
 			ToDoItem doItem = (ToDoItem) obj;
-			if(this.authorEmailId.equals(doItem.authorEmailId) && this.id==doItem.id && this.date==doItem.date && this.todoString.equals(doItem.todoString)) {
+			if(this.authorEmailId.equals(doItem.authorEmailId) && this.id==doItem.id && this.date==doItem.date && this.todoString.equals(doItem.todoString) && this.place.equals(doItem.place)) {
 				return true;
 			}else {
 				return false;
@@ -76,12 +86,12 @@ public class ToDoItem{
 	@Override
 	public int hashCode() {
 		// TODO Auto-generated method stub
-		return (id+""+authorEmailId+todoString).hashCode();
+		return (id+""+authorEmailId+todoString+place).hashCode();
 	}
 	
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return "("+this.id+", "+this.todoString+", "+this.date+", "+this.authorEmailId+")";
+		return "("+this.id+", "+this.todoString+", "+this.date+", "+this.place+", "+this.authorEmailId+")";
 	}
 }

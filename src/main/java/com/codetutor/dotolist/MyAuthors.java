@@ -33,7 +33,6 @@ ToDoService toDoService;
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Status isAuthorAuthorized(Author author) {
-		System.out.println(" MyAuthors isAuthorAuthorized: "+ author);
 		return toDoService.isAuthorAutheticated(author);
 	}
 	

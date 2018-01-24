@@ -82,7 +82,7 @@ public class ToDoService {
 	}
 
 	
-	public List<ToDoItem> addToDoItem(String emailId, String toDoItem) {
+	public List<ToDoItem> addToDoItem(String emailId, String toDoItem, String place) {
 		List<ToDoItem> todoList = null;
 		if(isRegisteredAuthor(emailId)){
 			if(doesToDoListExists(emailId)) {
@@ -90,7 +90,7 @@ public class ToDoService {
 			}else {
 				Author author = registeredAuthors.get(emailId);
 				List<ToDoItem> doItems = new ArrayList<ToDoItem>();
-				ToDoItem doItem = new ToDoItem(toDoItem, emailId);
+				ToDoItem doItem = new ToDoItem(toDoItem, emailId, place);
 				doItems.add(doItem);
 				ToDoList doList = new ToDoList(author,doItems);
 				toDoListOfAuthors.put(emailId, doList);
@@ -112,7 +112,7 @@ public class ToDoService {
 			}else {
 				Author author = registeredAuthors.get(toDoItem.getAuthorEmailId());
 				List<ToDoItem> doItems = new ArrayList<ToDoItem>();
-				newluCreatedToDItem = new ToDoItem(toDoItem.getTodoString(), toDoItem.getAuthorEmailId());
+				newluCreatedToDItem = new ToDoItem(toDoItem.getTodoString(), toDoItem.getAuthorEmailId(), toDoItem.getPlace());
 				doItems.add(newluCreatedToDItem);
 				ToDoList doList = new ToDoList(author,doItems);
 				toDoListOfAuthors.put(toDoItem.getAuthorEmailId(), doList);
@@ -160,6 +160,22 @@ public class ToDoService {
 		}
 		return doItem;
 	}
+	
+	public ToDoItem updateToDoItem(ToDoItem currentToDoItem, ToDoItem proposedToDoItem) {
+		ToDoItem doItem = null;
+		List<ToDoItem> toDoList = toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems();
+		if(toDoList.contains(currentToDoItem)) {
+			int index = toDoList.indexOf(currentToDoItem);
+			toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index).setTodoString(proposedToDoItem.getTodoString());
+			toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index).setPlace(proposedToDoItem.getPlace());
+			toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index).setDate(proposedToDoItem.getDate());
+			doItem = toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index);
+		}else{
+			doItem = currentToDoItem;
+		}
+		return doItem;
+	}
+	
 	
 	public Status isAuthorAutheticated(Author author) {
 		Status status=null;
