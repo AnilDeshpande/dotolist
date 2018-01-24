@@ -148,6 +148,19 @@ public class ToDoService {
 		return status;
 	}
 	
+	public ToDoItem updateToDoItem(ToDoItem currentToDoItem, String todoString) {
+		ToDoItem doItem = null;
+		List<ToDoItem> toDoList = toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems();
+		if(toDoList.contains(currentToDoItem)) {
+			int index = toDoList.indexOf(currentToDoItem);
+			toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index).setTodoString(todoString);
+			doItem = toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index);
+		}else{
+			doItem = currentToDoItem;
+		}
+		return doItem;
+	}
+	
 	public Status isAuthorAutheticated(Author author) {
 		Status status=null;
 		Author author2 = registeredAuthors.get(author.getAuthorEmailId());
@@ -164,6 +177,8 @@ public class ToDoService {
 		
 		return status;
 	}
+	
+	
 	
 
 }

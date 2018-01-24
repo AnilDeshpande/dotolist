@@ -8,6 +8,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -42,11 +43,21 @@ public class MyToDos {
 		return toDoService.addToDoItem(toDoItem);
 	}
 	
+	@PUT
+	@Path("/{toDoString}")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public ToDoItem updateToDoItem(ToDoItem currentToDoItem ,@PathParam("toDoString") String toDoString) {
+		System.out.println("Before: "+currentToDoItem +" & String: "+toDoString);
+		ToDoItem doItem = toDoService.updateToDoItem(currentToDoItem, toDoString);
+		System.out.println("Before: "+doItem);
+		return doItem;
+	}
+	
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Status deleteMessageByAuthor(ToDoItem doItem){
 		return toDoService.deleteToDoItem(doItem);
-		
 	}
 }

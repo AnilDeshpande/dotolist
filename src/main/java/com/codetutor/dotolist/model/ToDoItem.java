@@ -63,7 +63,7 @@ public class ToDoItem{
 		// TODO Auto-generated method stub
 		if(obj instanceof ToDoItem) {
 			ToDoItem doItem = (ToDoItem) obj;
-			if(this.authorEmailId.equals(doItem.authorEmailId) && this.id==doItem.id) {
+			if(this.authorEmailId.equals(doItem.authorEmailId) && this.id==doItem.id && this.date==doItem.date && this.todoString.equals(doItem.todoString)) {
 				return true;
 			}else {
 				return false;
@@ -71,6 +71,17 @@ public class ToDoItem{
 		}else {
 			return false;
 		}
-		
+	}
+	
+	@Override
+	public int hashCode() {
+		// TODO Auto-generated method stub
+		return (id+""+authorEmailId+todoString).hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return "("+this.id+", "+this.todoString+", "+this.date+", "+this.authorEmailId+")";
 	}
 }
