@@ -1,12 +1,17 @@
 package com.codetutor.dotolist.model;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class ToDoList {
+public class ToDoList implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -376481912229114740L;
 	private Author author;
 	private List<ToDoItem> doItems;
 	

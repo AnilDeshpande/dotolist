@@ -1,11 +1,18 @@
 package com.codetutor.dotolist.model;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 
-public class Author {
+public class Author implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2159439791539232751L;
+
 	private static long authorCount=0;
 	
 	private long authorId;

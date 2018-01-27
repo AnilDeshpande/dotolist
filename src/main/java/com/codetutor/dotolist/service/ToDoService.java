@@ -1,10 +1,16 @@
 package com.codetutor.dotolist.service;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.codetutor.dotolist.model.Author;
 import com.codetutor.dotolist.model.Status;
@@ -18,11 +24,17 @@ public class ToDoService {
 	Map<String, ToDoList> toDoListOfAuthors = new HashMap<String, ToDoList>();
 	
 	private  static ToDoService toDoServiceInstance;
+
+	private ToDoService() {
+		desrializeRegisteredAuthors();
+		deserializeToDos();
+	}
 	
 	public static ToDoService getInstance() {
 		if(toDoServiceInstance==null) {
 			toDoServiceInstance = new ToDoService();
 		}
+		
 		return toDoServiceInstance;
 	}
 	
@@ -194,7 +206,79 @@ public class ToDoService {
 		return status;
 	}
 	
+	private void serializeRegisteredAuthors() {
+		System.out.println("serializeRegisteredAuthors ");
+		
+		try {
+			File file=new File("authors.txt");
+			file.createNewFile();
+			FileOutputStream fileOutputStream=new FileOutputStream(file);
+			ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+			objectOutputStream.writeObject(registeredAuthors);
+			objectOutputStream.flush();
+			objectOutputStream.close();
+		}catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}catch (IOException e) {
+			e.printStackTrace();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
 	
-	
+	private void serializeToDos() {
+		System.out.println("serializeToDos ");
+		try {
+			File file=new File("todos.txt");
+			file.createNewFile();
+			FileOutputStream fileOutputStream=new FileOutputStream(file);
+			ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+			objectOutputStream.writeObject(toDoListOfAuthors);
+			objectOutputStream.flush();
+			objectOutputStream.close();
+		}catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}catch (IOException e) {
+			e.printStackTrace();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
+	private void deserializeToDos() {
+		System.out.println("deserializeToDos");
+		Map<String, ToDoList> toDoListOfAuthors = new HashMap<String, ToDoList>();
+		try {
+			FileInputStream fileInputStream=new FileInputStream("todos.txt");
+			ObjectInputStream inputStream=new ObjectInputStream(fileInputStream);
+			toDoListOfAuthors = (Map<String, ToDoList>)inputStream.readObject();
+			inputStream.close();
+		}catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}catch (IOException e) {
+			e.printStackTrace();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		this.toDoListOfAuthors = toDoListOfAuthors;
+	}
+	
+	private void desrializeRegisteredAuthors() {
+		System.out.println("desrializeRegisteredAuthors");
+		Map<String, Author> registeredAuthors = new HashMap<String, Author>();
+		try {
+			FileInputStream fileInputStream=new FileInputStream("authors.txt");
+			ObjectInputStream inputStream=new ObjectInputStream(fileInputStream);
+			registeredAuthors = (Map<String, Author>)inputStream.readObject();
+			inputStream.close();
+		}catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}catch (IOException e) {
+			e.printStackTrace();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		this.registeredAuthors = registeredAuthors;
+	}
 }
