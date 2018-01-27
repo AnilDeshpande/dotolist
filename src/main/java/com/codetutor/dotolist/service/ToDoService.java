@@ -6,12 +6,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.codetutor.dotolist.db.DatabaseService;
 import com.codetutor.dotolist.model.Author;
 import com.codetutor.dotolist.model.Status;
 import com.codetutor.dotolist.model.ToDoItem;
 import com.codetutor.dotolist.model.ToDoList;
 
 public class ToDoService {
+	
+	DatabaseService databaseService = new DatabaseService();
 	
 	Map<String, Author> registeredAuthors = new HashMap<String, Author>();
 	
