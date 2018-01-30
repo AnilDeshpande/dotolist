@@ -17,17 +17,19 @@ import com.codetutor.dotolist.model.Status;
 import com.codetutor.dotolist.model.ToDoItem;
 import com.codetutor.dotolist.model.ToDoList;
 
+import db.InMemoryDB;
+
 public class ToDoService {
 	
-	Map<String, Author> registeredAuthors = new HashMap<String, Author>();
+	Map<String, Author> registeredAuthors;
 	
-	Map<String, ToDoList> toDoListOfAuthors = new HashMap<String, ToDoList>();
+	Map<String, ToDoList> toDoListOfAuthors;
 	
 	private  static ToDoService toDoServiceInstance;
 
 	private ToDoService() {
-		desrializeRegisteredAuthors();
-		deserializeToDos();
+		registeredAuthors = new HashMap<String, Author>();
+		toDoListOfAuthors = new HashMap<String, ToDoList>();
 	}
 	
 	public static ToDoService getInstance() {
@@ -67,7 +69,7 @@ public class ToDoService {
 		if(registeredAuthors.containsKey(authorEmailId)) {
 			return author;
 		}else {
-			author=new Author(authorName, authorEmailId, authorPassword);
+			author=new Author(InMemoryDB.getAuthorId(), authorName, authorEmailId, authorPassword);
 			registeredAuthors.put(authorEmailId, author);
 		}
 		return author;
@@ -78,6 +80,7 @@ public class ToDoService {
 		if(registeredAuthors.containsKey(author.getAuthorEmailId())) {
 			createdAuthor=registeredAuthors.get(author.getAuthorEmailId());
 		}else {
+			author.setAuthorId(InMemoryDB.getAuthorId());
 			createdAuthor=new Author(author);
 			registeredAuthors.put(author.getAuthorEmailId(), createdAuthor);
 		}
@@ -102,7 +105,7 @@ public class ToDoService {
 			}else {
 				Author author = registeredAuthors.get(emailId);
 				List<ToDoItem> doItems = new ArrayList<ToDoItem>();
-				ToDoItem doItem = new ToDoItem(toDoItem, emailId, place);
+				ToDoItem doItem = new ToDoItem(InMemoryDB.getToDoId(), toDoItem, emailId, place);
 				doItems.add(doItem);
 				ToDoList doList = new ToDoList(author,doItems);
 				toDoListOfAuthors.put(emailId, doList);
@@ -119,12 +122,13 @@ public class ToDoService {
 		if(isRegisteredAuthor(toDoItem.getAuthorEmailId())){
 			if(doesToDoListExists(toDoItem.getAuthorEmailId())) {
 				todoList = toDoListOfAuthors.get(toDoItem.getAuthorEmailId()).getDoItems();
+				toDoItem.setId(InMemoryDB.getToDoId());
 				newluCreatedToDItem=new ToDoItem(toDoItem);
 				todoList.add(new ToDoItem(newluCreatedToDItem));
 			}else {
 				Author author = registeredAuthors.get(toDoItem.getAuthorEmailId());
 				List<ToDoItem> doItems = new ArrayList<ToDoItem>();
-				newluCreatedToDItem = new ToDoItem(toDoItem.getTodoString(), toDoItem.getAuthorEmailId(), toDoItem.getPlace());
+				newluCreatedToDItem = new ToDoItem(InMemoryDB.getToDoId(), toDoItem.getTodoString(), toDoItem.getAuthorEmailId(), toDoItem.getPlace());
 				doItems.add(newluCreatedToDItem);
 				ToDoList doList = new ToDoList(author,doItems);
 				toDoListOfAuthors.put(toDoItem.getAuthorEmailId(), doList);

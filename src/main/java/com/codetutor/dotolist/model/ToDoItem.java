@@ -27,12 +27,12 @@ public class ToDoItem implements Serializable{
 	}
 	
 	public ToDoItem(ToDoItem doItem) {
-		this(doItem.todoString, doItem.authorEmailId, doItem.place);
+		this(doItem.id, doItem.todoString, doItem.authorEmailId, doItem.place);
 	}
 	
-	public ToDoItem(String todoString, String authorEmailId,String place) {
+	public ToDoItem(long id, String todoString, String authorEmailId,String place) {
 		super();
-		this.id = ++ID_COUNT;
+		this.id = id;
 		this.todoString = todoString;
 		this.date = new Date().getTime();
 		this.authorEmailId = authorEmailId;

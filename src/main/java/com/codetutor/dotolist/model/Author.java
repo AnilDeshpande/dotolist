@@ -25,12 +25,12 @@ public class Author implements Serializable{
 	}
 	
 	public Author(Author author) {
-		this(author.authorName, author.authorEmailId, author.authorPassword);
+		this(author.authorId, author.authorName, author.authorEmailId, author.authorPassword);
 	}
 	
-	public Author(String authorName, String authorEmailId, String authorPassword) {
+	public Author(long authorId, String authorName, String authorEmailId, String authorPassword) {
 		super();
-		this.authorId = ++authorCount;
+		this.authorId = authorId;
 		this.authorName = authorName;
 		this.authorEmailId = authorEmailId;
 		this.authorPassword = authorPassword;
