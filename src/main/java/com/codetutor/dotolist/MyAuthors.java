@@ -5,9 +5,11 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import com.codetutor.dotolist.model.Author;
-import com.codetutor.dotolist.model.Status;
+import com.codetutor.dotolist.model.ToDoAppRestStatus;
 import com.codetutor.dotolist.service.ToDoService;
 
 @Path("authors")
@@ -24,16 +26,23 @@ ToDoService toDoService;
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Author registerUser(Author author){
-		return toDoService.registerAuthor(author);
+	public Response registerUser(Author author){
+		Author entity = toDoService.registerAuthor(author);	
+		return Response.status(Status.CREATED).entity(entity).build();
 	}
 	
 	@POST
 	@Path("/autheticate")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Status isAuthorAuthorized(Author author) {
-		return toDoService.isAuthorAutheticated(author);
+	public Response isAuthorAuthorized(Author author) {
+		ToDoAppRestStatus entity= toDoService.isAuthorAutheticated(author);
+		Response response=null;
+		if(entity.getStatusCode()==200) {
+			response= Response.status(Status.OK).entity(entity).build();
+		}else if (entity.getStatusCode()==404) {
+			response= Response.status(Status.NOT_FOUND).entity(entity).build();
+		}
+		return response;
 	}
-	
 }

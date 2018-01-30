@@ -1,16 +1,16 @@
 package com.codetutor.dotolist.model;
 
-public class Status {
+public class ToDoAppRestStatus {
 
 	private long statusCode;
 	private String message;
 	
-	public Status() {
+	public ToDoAppRestStatus() {
 		// TODO Auto-generated constructor stub
 		super();
 	}
 	
-	public Status(long statusCode, String message) {
+	public ToDoAppRestStatus(long statusCode, String message) {
 		super();
 		this.statusCode = statusCode;
 		this.message = message;

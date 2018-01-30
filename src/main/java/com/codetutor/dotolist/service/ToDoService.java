@@ -12,8 +12,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.codetutor.dotolist.exceptions.AuthorNotRegisredException;
+import com.codetutor.dotolist.exceptions.ToDoItemNotFoundException;
 import com.codetutor.dotolist.model.Author;
-import com.codetutor.dotolist.model.Status;
+import com.codetutor.dotolist.model.ToDoAppRestStatus;
 import com.codetutor.dotolist.model.ToDoItem;
 import com.codetutor.dotolist.model.ToDoList;
 
@@ -116,7 +118,7 @@ public class ToDoService {
 		return todoList;
 	}
 	
-	public ToDoItem addToDoItem(ToDoItem toDoItem){
+	public ToDoItem addToDoItem(ToDoItem toDoItem) throws AuthorNotRegisredException{
 		List<ToDoItem> todoList = null;
 		ToDoItem newluCreatedToDItem = null;
 		if(isRegisteredAuthor(toDoItem.getAuthorEmailId())){
@@ -132,8 +134,9 @@ public class ToDoService {
 				doItems.add(newluCreatedToDItem);
 				ToDoList doList = new ToDoList(author,doItems);
 				toDoListOfAuthors.put(toDoItem.getAuthorEmailId(), doList);
-		
 			}
+		}else {
+			throw new AuthorNotRegisredException(403,"Author is not registred, can't add todo item"); 
 		}
 		return newluCreatedToDItem;
 	}
@@ -151,16 +154,21 @@ public class ToDoService {
 		return doItem;
 	}
 	
-	public Status deleteToDoItem(ToDoItem doItem) {
-		Status status = new Status();
+	public ToDoAppRestStatus deleteToDoItem(ToDoItem doItem) throws ToDoItemNotFoundException{
+		ToDoAppRestStatus status = new ToDoAppRestStatus();
 		List<ToDoItem> toDoList = toDoListOfAuthors.get(doItem.getAuthorEmailId()).getDoItems();
-		if(!toDoList.contains(doItem)) {
-			status = new Status(204, "Could not find entry to delete");
+		if(toDoList!=null) {
+			if(!toDoList.contains(doItem)) {
+				throw new ToDoItemNotFoundException(404,"ToDoItems not found");
+			}else {
+				toDoList.remove(doItem);
+				toDoListOfAuthors.get(doItem.getAuthorEmailId()).setDoItems(toDoList);
+				status = new ToDoAppRestStatus(204,"Successfully deleted");
+			}
 		}else {
-			toDoList.remove(doItem);
-			toDoListOfAuthors.get(doItem.getAuthorEmailId()).setDoItems(toDoList);
-			status = new Status(200,"Successfully deleted");
+			throw new ToDoItemNotFoundException(404,"ToDoItems not found");
 		}
+		
 		return status;
 	}
 	
@@ -177,7 +185,7 @@ public class ToDoService {
 		return doItem;
 	}
 	
-	public ToDoItem updateToDoItem(ToDoItem currentToDoItem, ToDoItem proposedToDoItem) {
+	public ToDoItem updateToDoItem(ToDoItem currentToDoItem, ToDoItem proposedToDoItem) throws ToDoItemNotFoundException{
 		ToDoItem doItem = null;
 		List<ToDoItem> toDoList = toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems();
 		if(toDoList.contains(currentToDoItem)) {
@@ -187,24 +195,24 @@ public class ToDoService {
 			toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index).setDate(proposedToDoItem.getDate());
 			doItem = toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index);
 		}else{
-			doItem = currentToDoItem;
+			throw new ToDoItemNotFoundException(404,"ToDoItem for current author not found");
 		}
 		return doItem;
 	}
 	
 	
-	public Status isAuthorAutheticated(Author author) {
-		Status status=null;
+	public ToDoAppRestStatus isAuthorAutheticated(Author author) {
+		ToDoAppRestStatus status=null;
 		Author author2 = registeredAuthors.get(author.getAuthorEmailId());
 		System.out.println();
 		if(author2!=null) {
 			if(author.equals(author2)) {
-				status = new Status(200,"Authentication Succeded");
+				status = new ToDoAppRestStatus(200,"Authentication Succeded");
 			}else {
-				status = new Status(204,"Authentication failed");
+				status = new ToDoAppRestStatus(404,"User is not registered");
 			}
 		}else {
-			status=new Status(204, "Authentication Filed");
+			status=new ToDoAppRestStatus(404, "User is not registered");
 		}
 		
 		return status;
