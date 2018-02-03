@@ -1,6 +1,10 @@
 package com.codetutor.dotolist.exceptions;
 
 public class AuthorNotRegisredException extends Exception {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public long errorCode;
 	
 

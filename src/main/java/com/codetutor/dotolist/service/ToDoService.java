@@ -12,9 +12,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
+import com.codetutor.dotolist.exceptions.AuthorHasAlreadyLoggedInException;
 import com.codetutor.dotolist.exceptions.AuthorNotRegisredException;
 import com.codetutor.dotolist.exceptions.ToDoItemNotFoundException;
 import com.codetutor.dotolist.model.Author;
+import com.codetutor.dotolist.model.AuthorWithActiveSession;
 import com.codetutor.dotolist.model.ToDoAppRestStatus;
 import com.codetutor.dotolist.model.ToDoItem;
 import com.codetutor.dotolist.model.ToDoList;
@@ -24,14 +28,34 @@ import db.InMemoryDB;
 public class ToDoService {
 	
 	Map<String, Author> registeredAuthors;
-	
 	Map<String, ToDoList> toDoListOfAuthors;
+	
+	Map<String, String> activeSessions; 
 	
 	private  static ToDoService toDoServiceInstance;
 
 	private ToDoService() {
 		registeredAuthors = new HashMap<String, Author>();
 		toDoListOfAuthors = new HashMap<String, ToDoList>();
+		activeSessions = new HashMap<String, String>();
+	}
+	
+	public void loginUser(String emailId, String sessionId) {
+		activeSessions.put(emailId, sessionId);
+	}
+	
+	public void endToDoAuthorSession(String emailId) {
+		activeSessions.remove(emailId);
+	}
+	
+	public boolean isUserLoggedIn(String emailId, String sessionId) {
+		boolean isUserLoggedIn=false;
+		if(activeSessions.containsKey(emailId)) {
+			if(activeSessions.get(emailId).equals(sessionId)) {
+				isUserLoggedIn = true;
+			}
+		}
+		return isUserLoggedIn;
 	}
 	
 	public static ToDoService getInstance() {
@@ -62,6 +86,41 @@ public class ToDoService {
 			}
 		}
 		return doesToDoEntryExists;
+	}
+	
+	public AuthorWithActiveSession login(Author author, HttpServletRequest httpServletRequest) throws AuthorNotRegisredException{
+		AuthorWithActiveSession authorWithActiveSession = null;
+		if(isRegisteredAuthor(author.getAuthorEmailId())) {
+			if(!isAuthorPresentInActiveSessions(author)) {
+				authorWithActiveSession= new AuthorWithActiveSession();
+				authorWithActiveSession.setToken(httpServletRequest.getSession(true).getId());
+				activeSessions.put(author.getAuthorEmailId(), authorWithActiveSession.getToken());
+			}else {
+				authorWithActiveSession = new AuthorWithActiveSession();
+				authorWithActiveSession.setToken(activeSessions.get(author.getAuthorEmailId()));
+			}
+		}else {
+			throw new AuthorNotRegisredException(403,"Registration is required");
+		}
+		
+		return authorWithActiveSession;
+	}
+	
+	public boolean signOut(Author author) {
+		boolean isSignoutSuccessful = false;
+		if(activeSessions!=null && activeSessions.get(author.getAuthorEmailId())!=null) {
+			activeSessions.remove(author.getAuthorEmailId());
+			isSignoutSuccessful=true;
+		}
+		return isSignoutSuccessful;
+	}
+	
+	private boolean isAuthorPresentInActiveSessions(Author author) {
+		if(activeSessions.get(author.getAuthorEmailId())!=null) {
+			return true;
+		}else {
+			return false;
+		}
 	}
 	
 	
