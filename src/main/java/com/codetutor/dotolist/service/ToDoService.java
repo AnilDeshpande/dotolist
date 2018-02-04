@@ -14,6 +14,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.codetutor.dotolist.exceptions.AuthenticationFailedException;
 import com.codetutor.dotolist.exceptions.AuthorHasAlreadyLoggedInException;
 import com.codetutor.dotolist.exceptions.AuthorNotLoggedIn;
 import com.codetutor.dotolist.exceptions.AuthorNotRegisredException;
@@ -90,9 +91,9 @@ public class ToDoService {
 		return doesToDoEntryExists;
 	}
 	
-	public AuthorWithActiveSession login(Author author, HttpServletRequest httpServletRequest) throws AuthorNotRegisredException{
+	public AuthorWithActiveSession login(Author author, HttpServletRequest httpServletRequest) throws AuthorNotRegisredException, AuthenticationFailedException{
 		AuthorWithActiveSession authorWithActiveSession = null;
-		if(isRegisteredAuthor(author.getAuthorEmailId())) {
+		if(authenticateAuthor(author)) {
 			if(!isAuthorPresentInActiveSessions(author)) {
 				authorWithActiveSession= new AuthorWithActiveSession();
 				authorWithActiveSession.setToken(httpServletRequest.getSession(true).getId());
@@ -300,11 +301,27 @@ public class ToDoService {
 		return doItem;
 	}
 	
+	private boolean authenticateAuthor(Author author) throws AuthorNotRegisredException, AuthenticationFailedException{
+		boolean isAuthorAuthenticated=false;
+		
+		Author author2 = registeredAuthors.get(author.getAuthorEmailId());
+		if(author2!=null) {
+			if(author.equals(author2)) {
+				isAuthorAuthenticated=true;
+			}else {
+				throw new AuthenticationFailedException(403,"Authetication Failed");
+			}
+		}else {
+			throw new AuthorNotRegisredException(404,"User not registered");
+		}
+		
+		return isAuthorAuthenticated;
+		
+	}
 	
 	public ToDoAppRestStatus isAuthorAutheticated(Author author) {
 		ToDoAppRestStatus status=null;
 		Author author2 = registeredAuthors.get(author.getAuthorEmailId());
-		System.out.println();
 		if(author2!=null) {
 			if(author.equals(author2)) {
 				status = new ToDoAppRestStatus(200,"Authentication Succeded");

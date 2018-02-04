@@ -10,6 +10,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.codetutor.dotolist.exceptions.AuthenticationFailedException;
 import com.codetutor.dotolist.exceptions.AuthorNotRegisredException;
 import com.codetutor.dotolist.model.Author;
 import com.codetutor.dotolist.model.AuthorWithActiveSession;
@@ -31,10 +32,11 @@ ToDoService toDoService;
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response registerUser(Author author){
-		Author entity = toDoService.registerAuthor(author);	
-		entity.setAuthorPassword(null);
+		Author entity = toDoService.registerAuthor(author);
+		Author entiryWithoutPassword = new Author(entity);
+		entiryWithoutPassword.setAuthorPassword(null);
 		if(entity.getAuthorId()>0) {
-			return Response.status(Status.CREATED).entity(entity).build();
+			return Response.status(Status.CREATED).entity(entiryWithoutPassword).build();
 		}else {
 			return Response.status(Status.EXPECTATION_FAILED).entity(new ToDoAppRestStatus(417, "You could not be registered, please contact back office")).build();
 		}
@@ -52,10 +54,9 @@ ToDoService toDoService;
 			entity = toDoService.login(author,request);
 			response= Response.status(Status.CREATED).entity(entity).build();
 		}catch (AuthorNotRegisredException e) {
-			ToDoAppRestStatus appRestStatus=new ToDoAppRestStatus();
-			appRestStatus.setStatusCode(e.errorCode);
-			appRestStatus.setMessage(e.getMessage());
-			response = Response.status(Status.FORBIDDEN).entity(appRestStatus).build();
+			response = Response.status(Status.FORBIDDEN).entity(new ToDoAppRestStatus(e.errorCode, e.getMessage())).build();
+		}catch (AuthenticationFailedException e) {
+			response = Response.status(Status.FORBIDDEN).entity(new ToDoAppRestStatus(e.errorCode,e.getMessage())).build();
 		}catch (Exception e) {
 			response = Response.status(Status.INTERNAL_SERVER_ERROR).build();
 		}	
