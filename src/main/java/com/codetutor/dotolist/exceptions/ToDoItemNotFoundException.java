@@ -1,5 +1,11 @@
 package com.codetutor.dotolist.exceptions;
 
+/**
+ * 
+ * @author anildeshpande
+ *	This exception is thrown when a ToDo Item is not found against an author while deleting 
+ * or updating
+ */
 public class ToDoItemNotFoundException extends Exception {
 
 	/**

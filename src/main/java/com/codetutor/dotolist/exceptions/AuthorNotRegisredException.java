@@ -1,5 +1,12 @@
 package com.codetutor.dotolist.exceptions;
 
+/**
+ * 
+ * @author anildeshpande
+ * This exception is typically thrown when the Author has not
+ * yet been registered in the app
+ */
+
 public class AuthorNotRegisredException extends Exception {
 	/**
 	 * 

@@ -32,7 +32,13 @@ ToDoService toDoService;
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response registerUser(Author author){
 		Author entity = toDoService.registerAuthor(author);	
-		return Response.status(Status.CREATED).entity(entity).build();
+		entity.setAuthorPassword(null);
+		if(entity.getAuthorId()>0) {
+			return Response.status(Status.CREATED).entity(entity).build();
+		}else {
+			return Response.status(Status.EXPECTATION_FAILED).entity(new ToDoAppRestStatus(417, "You could not be registered, please contact back office")).build();
+		}
+		
 	}
 	
 	@POST

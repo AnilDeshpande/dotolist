@@ -1,5 +1,11 @@
 package com.codetutor.dotolist.exceptions;
 
+/**
+ * 
+ * @author anildeshpande
+ * This exception needs to be thrown typically when the Author is registered
+ * but new logins attempts happen 
+ */
 public class AuthorHasAlreadyLoggedInException extends Exception {
 	
 	/**

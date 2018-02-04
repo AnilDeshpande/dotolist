@@ -15,7 +15,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import com.codetutor.dotolist.exceptions.AuthorHasAlreadyLoggedInException;
+import com.codetutor.dotolist.exceptions.AuthorNotLoggedIn;
 import com.codetutor.dotolist.exceptions.AuthorNotRegisredException;
+import com.codetutor.dotolist.exceptions.InvalidOrForiddedException;
 import com.codetutor.dotolist.exceptions.ToDoItemNotFoundException;
 import com.codetutor.dotolist.model.Author;
 import com.codetutor.dotolist.model.AuthorWithActiveSession;
@@ -148,114 +150,153 @@ public class ToDoService {
 		return createdAuthor;
 	}
 	
-	public List<ToDoItem> getMessages(String authorEmailId){
+	public List<ToDoItem> getMessages(String authorEmailId, String token) throws ToDoItemNotFoundException, AuthorNotLoggedIn, InvalidOrForiddedException{
 		ToDoList toDoList = toDoListOfAuthors.get(authorEmailId);
 		if(toDoList==null) {
-			return null;
+			throw new ToDoItemNotFoundException(404,"ToDoItems Not found");
 		}else {
-			return toDoList.getDoItems();
+			if(activeSessions.get(authorEmailId)!=null) {
+				if(activeSessions.get(authorEmailId).equals(token)) {
+					return toDoList.getDoItems();
+				}else {
+					throw new InvalidOrForiddedException(403,"Forbidden from this operation");
+				}
+			}else {
+				throw new AuthorNotLoggedIn(209, "Author not logged in Excetion");
+			}
+			
 		}
 	}
 
 	
-	public List<ToDoItem> addToDoItem(String emailId, String toDoItem, String place) {
+	public List<ToDoItem> addToDoItem(String emailId, String toDoItem, String place, String token) throws InvalidOrForiddedException{
 		List<ToDoItem> todoList = null;
-		if(isRegisteredAuthor(emailId)){
-			if(doesToDoListExists(emailId)) {
-				todoList = toDoListOfAuthors.get(emailId).getDoItems();
-			}else {
-				Author author = registeredAuthors.get(emailId);
-				List<ToDoItem> doItems = new ArrayList<ToDoItem>();
-				ToDoItem doItem = new ToDoItem(InMemoryDB.getToDoId(), toDoItem, emailId, place);
-				doItems.add(doItem);
-				ToDoList doList = new ToDoList(author,doItems);
-				toDoListOfAuthors.put(emailId, doList);
-				
-				todoList = toDoListOfAuthors.get(emailId).getDoItems();
+		if(activeSessions.get(emailId)!=null && activeSessions.get(emailId).equals(token)) {
+			if(isRegisteredAuthor(emailId)){
+				if(doesToDoListExists(emailId)) {
+					todoList = toDoListOfAuthors.get(emailId).getDoItems();
+				}else {
+					Author author = registeredAuthors.get(emailId);
+					List<ToDoItem> doItems = new ArrayList<ToDoItem>();
+					ToDoItem doItem = new ToDoItem(InMemoryDB.getToDoId(), toDoItem, emailId, place);
+					doItems.add(doItem);
+					ToDoList doList = new ToDoList(author,doItems);
+					toDoListOfAuthors.put(emailId, doList);
+					
+					todoList = toDoListOfAuthors.get(emailId).getDoItems();
+				}
 			}
+		}else {
+			throw new InvalidOrForiddedException(403, "Invalid session or forbidden from doing this operation");
 		}
+		
 		return todoList;
 	}
 	
-	public ToDoItem addToDoItem(ToDoItem toDoItem) throws AuthorNotRegisredException{
+	public ToDoItem addToDoItem(ToDoItem toDoItem, String token) throws AuthorNotRegisredException, InvalidOrForiddedException{
 		List<ToDoItem> todoList = null;
 		ToDoItem newluCreatedToDItem = null;
-		if(isRegisteredAuthor(toDoItem.getAuthorEmailId())){
-			if(doesToDoListExists(toDoItem.getAuthorEmailId())) {
-				todoList = toDoListOfAuthors.get(toDoItem.getAuthorEmailId()).getDoItems();
-				toDoItem.setId(InMemoryDB.getToDoId());
-				newluCreatedToDItem=new ToDoItem(toDoItem);
-				todoList.add(new ToDoItem(newluCreatedToDItem));
+		if(activeSessions.get(toDoItem.getAuthorEmailId())!=null && activeSessions.get(toDoItem.getAuthorEmailId()).equals(token)) {
+			if(isRegisteredAuthor(toDoItem.getAuthorEmailId())){
+				if(doesToDoListExists(toDoItem.getAuthorEmailId())) {
+					todoList = toDoListOfAuthors.get(toDoItem.getAuthorEmailId()).getDoItems();
+					toDoItem.setId(InMemoryDB.getToDoId());
+					newluCreatedToDItem=new ToDoItem(toDoItem);
+					todoList.add(new ToDoItem(newluCreatedToDItem));
+				}else {
+					Author author = registeredAuthors.get(toDoItem.getAuthorEmailId());
+					List<ToDoItem> doItems = new ArrayList<ToDoItem>();
+					newluCreatedToDItem = new ToDoItem(InMemoryDB.getToDoId(), toDoItem.getTodoString(), toDoItem.getAuthorEmailId(), toDoItem.getPlace());
+					doItems.add(newluCreatedToDItem);
+					ToDoList doList = new ToDoList(author,doItems);
+					toDoListOfAuthors.put(toDoItem.getAuthorEmailId(), doList);
+				}
 			}else {
-				Author author = registeredAuthors.get(toDoItem.getAuthorEmailId());
-				List<ToDoItem> doItems = new ArrayList<ToDoItem>();
-				newluCreatedToDItem = new ToDoItem(InMemoryDB.getToDoId(), toDoItem.getTodoString(), toDoItem.getAuthorEmailId(), toDoItem.getPlace());
-				doItems.add(newluCreatedToDItem);
-				ToDoList doList = new ToDoList(author,doItems);
-				toDoListOfAuthors.put(toDoItem.getAuthorEmailId(), doList);
+				throw new AuthorNotRegisredException(403,"Author is not registred, can't add todo item"); 
 			}
 		}else {
-			throw new AuthorNotRegisredException(403,"Author is not registred, can't add todo item"); 
+			throw new InvalidOrForiddedException(403, "Invalid session or forbidden from doing this operation");
 		}
+		
 		return newluCreatedToDItem;
 	}
 
-	public ToDoItem getToDo(String authorEmailId, long toDoId) {
-		List<ToDoItem> toDoList= toDoListOfAuthors.get(authorEmailId).getDoItems();
+	public ToDoItem getToDo(String authorEmailId, long toDoId, String token) throws InvalidOrForiddedException{
 		ToDoItem doItem = null;
-		if(toDoList!=null) {
-			for(ToDoItem item: toDoList) {
-				if(item.getId() == toDoId) {
-					doItem = item;
+		if(activeSessions.get(authorEmailId)!=null && activeSessions.get(authorEmailId).equals(token)) {
+			List<ToDoItem> toDoList= toDoListOfAuthors.get(authorEmailId).getDoItems();
+			if(toDoList!=null) {
+				for(ToDoItem item: toDoList) {
+					if(item.getId() == toDoId) {
+						doItem = item;
+					}
 				}
 			}
+		}else {
+			throw new InvalidOrForiddedException(403, "Invalid session or forbidden from doing this operation");
 		}
+		
 		return doItem;
 	}
 	
-	public ToDoAppRestStatus deleteToDoItem(ToDoItem doItem) throws ToDoItemNotFoundException{
+	public ToDoAppRestStatus deleteToDoItem(ToDoItem doItem, String token) throws ToDoItemNotFoundException, InvalidOrForiddedException{
 		ToDoAppRestStatus status = new ToDoAppRestStatus();
-		List<ToDoItem> toDoList = toDoListOfAuthors.get(doItem.getAuthorEmailId()).getDoItems();
-		if(toDoList!=null) {
-			if(!toDoList.contains(doItem)) {
-				throw new ToDoItemNotFoundException(404,"ToDoItems not found");
+		if(activeSessions.get(doItem.getAuthorEmailId())!=null && activeSessions.get(doItem.getAuthorEmailId()).equals(token)) {
+			List<ToDoItem> toDoList = toDoListOfAuthors.get(doItem.getAuthorEmailId()).getDoItems();
+			if(toDoList!=null) {
+				if(!toDoList.contains(doItem)) {
+					throw new ToDoItemNotFoundException(404,"ToDoItems not found");
+				}else {
+					toDoList.remove(doItem);
+					toDoListOfAuthors.get(doItem.getAuthorEmailId()).setDoItems(toDoList);
+					status = new ToDoAppRestStatus(204,"Successfully deleted");
+				}
 			}else {
-				toDoList.remove(doItem);
-				toDoListOfAuthors.get(doItem.getAuthorEmailId()).setDoItems(toDoList);
-				status = new ToDoAppRestStatus(204,"Successfully deleted");
+				throw new ToDoItemNotFoundException(404,"ToDoItems not found");
 			}
 		}else {
-			throw new ToDoItemNotFoundException(404,"ToDoItems not found");
+			throw new InvalidOrForiddedException(403, "Invalid session or forbidden from doing this operation");
 		}
+		
 		
 		return status;
 	}
 	
-	public ToDoItem updateToDoItem(ToDoItem currentToDoItem, String todoString) {
+	public ToDoItem updateToDoItem(ToDoItem currentToDoItem, String todoString, String token) throws InvalidOrForiddedException{
 		ToDoItem doItem = null;
-		List<ToDoItem> toDoList = toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems();
-		if(toDoList.contains(currentToDoItem)) {
-			int index = toDoList.indexOf(currentToDoItem);
-			toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index).setTodoString(todoString);
-			doItem = toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index);
-		}else{
-			doItem = currentToDoItem;
+		if(activeSessions.get(currentToDoItem.getAuthorEmailId())!=null && activeSessions.get(currentToDoItem.getAuthorEmailId()).equals(token)) {
+			List<ToDoItem> toDoList = toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems();
+			if(toDoList.contains(currentToDoItem)) {
+				int index = toDoList.indexOf(currentToDoItem);
+				toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index).setTodoString(todoString);
+				doItem = toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index);
+			}else{
+				doItem = currentToDoItem;
+			}
+		}else {
+			throw new InvalidOrForiddedException(403, "Invalid session or forbidden from doing this operation");
 		}
+		
 		return doItem;
 	}
 	
-	public ToDoItem updateToDoItem(ToDoItem currentToDoItem, ToDoItem proposedToDoItem) throws ToDoItemNotFoundException{
+	public ToDoItem updateToDoItem(ToDoItem currentToDoItem, ToDoItem proposedToDoItem, String token) throws ToDoItemNotFoundException,InvalidOrForiddedException {
 		ToDoItem doItem = null;
-		List<ToDoItem> toDoList = toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems();
-		if(toDoList.contains(currentToDoItem)) {
-			int index = toDoList.indexOf(currentToDoItem);
-			toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index).setTodoString(proposedToDoItem.getTodoString());
-			toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index).setPlace(proposedToDoItem.getPlace());
-			toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index).setDate(proposedToDoItem.getDate());
-			doItem = toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index);
-		}else{
-			throw new ToDoItemNotFoundException(404,"ToDoItem for current author not found");
+		if(activeSessions.get(currentToDoItem.getAuthorEmailId())!=null && activeSessions.get(currentToDoItem.getAuthorEmailId()).equals(token)) {
+			List<ToDoItem> toDoList = toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems();
+			if(toDoList.contains(currentToDoItem)) {
+				int index = toDoList.indexOf(currentToDoItem);
+				toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index).setTodoString(proposedToDoItem.getTodoString());
+				toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index).setPlace(proposedToDoItem.getPlace());
+				toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index).setDate(proposedToDoItem.getDate());
+				doItem = toDoListOfAuthors.get(currentToDoItem.getAuthorEmailId()).getDoItems().get(index);
+			}else{
+				throw new ToDoItemNotFoundException(404,"ToDoItem for current author not found");
+			}
+		}else {
+			throw new InvalidOrForiddedException(403, "Invalid session or forbidden from doing this operation");
 		}
+		
 		return doItem;
 	}
 	
@@ -277,7 +318,7 @@ public class ToDoService {
 		return status;
 	}
 	
-	private void serializeRegisteredAuthors() {
+	/*private void serializeRegisteredAuthors() {
 		System.out.println("serializeRegisteredAuthors ");
 		
 		try {
@@ -351,5 +392,5 @@ public class ToDoService {
 			e.printStackTrace();
 		}
 		this.registeredAuthors = registeredAuthors;
-	}
+	}*/
 }

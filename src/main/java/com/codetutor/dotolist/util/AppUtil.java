@@ -8,7 +8,7 @@ import java.util.Base64;
 public class AppUtil {
 
 	public static String hashPassword(String password) {
-		password = password + "TODOLISTAPP!234%632312";
+		password = password + "ToDoListAapp!234%632312";
 		MessageDigest mdSha1 = null;
 		try {
 			mdSha1 = MessageDigest.getInstance("SHA-256");
