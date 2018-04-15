@@ -71,7 +71,7 @@ public class Author implements Serializable{
 		if(obj instanceof Author) {
 			Author author=(Author) obj;
 			if(this.authorEmailId.equals(author.authorEmailId) && this.authorPassword.equals(author.authorPassword) && 
-					this.authorId==author.authorId && this.authorName.equals(author.authorName)) {
+					this.authorName.equals(author.authorName)) {
 				return true;
 			}else {
 				return false;

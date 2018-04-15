@@ -26,7 +26,5 @@ public class UpdateToDoItem {
 	public void setProposedToDoItem(ToDoItem proposedToDoItem) {
 		this.proposedToDoItem = proposedToDoItem;
 	}
-	
-	
 
 }
