@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -59,6 +60,41 @@ public class ToDoService {
 			}
 		}
 		return isUserLoggedIn;
+	}
+	
+	private Author getAuthorBasedOnSessionId(String token) throws InvalidOrForiddedException{
+		Author author = null;
+		Set<String> emailIds = activeSessions.keySet();
+		for(String emailId: emailIds) {
+			if(activeSessions.containsKey(emailId)) {
+				author = registeredAuthors.get(emailId);
+				break;
+			}
+		}
+		if(author==null) {
+			throw new InvalidOrForiddedException(403, "Invalid session or forbidden from doing this operation");
+		}
+		return author;
+	}
+	
+	private ToDoItem getToDoItemForAuthor(Author author, long toDoId) throws ToDoItemNotFoundException{
+		List<ToDoItem> toDoList = toDoListOfAuthors.get(author.getAuthorEmailId()).getDoItems();
+		ToDoItem toDoItem=null;
+		if(toDoList!=null) {
+			for(ToDoItem item: toDoList) {
+				if(item.getId()==toDoId) {
+					toDoItem = item;
+					break;
+				}
+			}
+			if (toDoItem==null) {
+				throw new ToDoItemNotFoundException(404,"ToDoItems not found");
+			}
+		}else {
+			throw new ToDoItemNotFoundException(404,"ToDoItems not found");
+		}
+		
+		return toDoItem;
 	}
 	
 	public static ToDoService getInstance() {
@@ -263,6 +299,8 @@ public class ToDoService {
 		return status;
 	}
 	
+	
+	
 	public ToDoItem updateToDoItem(ToDoItem currentToDoItem, String todoString, String token) throws InvalidOrForiddedException{
 		ToDoItem doItem = null;
 		if(activeSessions.get(currentToDoItem.getAuthorEmailId())!=null && activeSessions.get(currentToDoItem.getAuthorEmailId()).equals(token)) {
@@ -332,6 +370,20 @@ public class ToDoService {
 			status=new ToDoAppRestStatus(404, "User is not registered");
 		}
 		
+		return status;
+	}
+
+	public ToDoAppRestStatus deleteToDoItem(long toDoId, String token) throws InvalidOrForiddedException, ToDoItemNotFoundException{
+		ToDoAppRestStatus status = new ToDoAppRestStatus();
+		Author author = getAuthorBasedOnSessionId(token);
+		ToDoItem toBeDeleted = getToDoItemForAuthor(author, toDoId);
+		
+		List<ToDoItem> toDoList = toDoListOfAuthors.get(toBeDeleted.getAuthorEmailId()).getDoItems();
+		if(toBeDeleted!=null) {
+			toDoList.remove(toBeDeleted);
+			toDoListOfAuthors.get(toBeDeleted.getAuthorEmailId()).setDoItems(toDoList);
+			status = new ToDoAppRestStatus(204,"Successfully deleted");
+		}
 		return status;
 	}
 	

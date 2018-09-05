@@ -111,4 +111,22 @@ public class MyToDos {
 		}
 		return response;
 	}
+	
+	@DELETE
+	@Path("/{toDoId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deleteToDo(@PathParam("toDoId") long toDoId, @HeaderParam("token") String token){
+		Response response=null;
+		try {
+			toDoService.deleteToDoItem(toDoId, token);
+			response = Response.status(Status.NO_CONTENT).build();
+		} catch (ToDoItemNotFoundException e) {
+			response = Response.status(Status.NOT_FOUND).entity(new ToDoAppRestStatus(e.errorCode, e.getMessage())).build();
+		}catch (InvalidOrForiddedException e) {
+			response = Response.status(Status.FORBIDDEN).entity(new ToDoAppRestStatus(e.errorCode, e.getMessage())).build();
+		}catch (Exception e) {
+			response = Response.status(Status.INTERNAL_SERVER_ERROR).build();
+		}
+		return response;
+	}
 }
